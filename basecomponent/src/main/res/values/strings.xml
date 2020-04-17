@@ -9,4 +9,8 @@
     <string name="base_dialog_upgrade_check_down_process">通知栏查看下载进度</string>
     <string name="base_dialog_upgrade_check_down_process_no_permission">您当前需允许显示通知栏，方可查看通知栏下载进度</string>
     <string name="base_update_downloading">正在下载...</string>
+    <string name="load_error_try_again">加载失败, 点击重试</string>
+    <string name="net_error_try_again">网络异常, 点击重试</string>
+    <string name="read_history_no_data">暂无数据</string>
+    <string name="no_data">暂无数据</string>
 </resources>
