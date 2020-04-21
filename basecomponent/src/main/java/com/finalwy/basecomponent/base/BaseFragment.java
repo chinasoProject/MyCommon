@@ -120,7 +120,7 @@ public abstract class BaseFragment<T extends BasePresenter> extends RxFragment i
             mDisposables.clear();
             mDisposables = null;
         }
-        //销毁页面时销毁已经存在的msgKey
+        // 销毁页面时销毁已经存在的msgKey
         if (msgKeyList != null && msgKeyList.size() != 0) {
             for (int i = 0; i < msgKeyList.size(); i++) {
                 removeMessage(Integer.parseInt(msgKeyList.get(i)));
