@@ -7,6 +7,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.finalwy.basecomponent.observer.ObserverListener;
+import com.finalwy.basecomponent.observer.ObserverManager;
 import com.finalwy.basecomponent.utils.ContinuationClickUtils;
 import com.finalwy.basecomponent.utils.ToastUtil;
 import com.trello.rxlifecycle3.LifecycleTransformer;
@@ -15,6 +17,10 @@ import com.trello.rxlifecycle3.components.support.RxFragment;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import io.reactivex.disposables.CompositeDisposable;
@@ -24,7 +30,7 @@ import io.reactivex.disposables.Disposable;
  * @author wy
  * @Date 2020-02-18
  */
-public abstract class BaseFragment<T extends BasePresenter> extends RxFragment implements BaseView {
+public abstract class BaseFragment<T extends BasePresenter> extends RxFragment implements BaseView, ObserverListener {
     protected String TAG = getClass().getSimpleName();
     private Unbinder unbinder;
     protected Context mContext;
@@ -32,6 +38,7 @@ public abstract class BaseFragment<T extends BasePresenter> extends RxFragment i
     protected T mPresenter;
     private CompositeDisposable mDisposables;
     protected Handler mHandler = new Handler();
+    protected List<String> msgKeyList = new ArrayList<>();
 
     @Override
     public void onAttach(Context context) {
@@ -113,6 +120,12 @@ public abstract class BaseFragment<T extends BasePresenter> extends RxFragment i
             mDisposables.clear();
             mDisposables = null;
         }
+        //销毁页面时销毁已经存在的msgKey
+        if (msgKeyList != null && msgKeyList.size() != 0) {
+            for (int i = 0; i < msgKeyList.size(); i++) {
+                removeMessage(Integer.parseInt(msgKeyList.get(i)));
+            }
+        }
     }
 
     @Override
@@ -138,5 +151,28 @@ public abstract class BaseFragment<T extends BasePresenter> extends RxFragment i
      */
     public boolean isFastClick() {
         return ContinuationClickUtils.isFastClick();
+    }
+
+
+    protected void observeMessage(int msgKey) {
+        msgKeyList.add(msgKey + "");
+        ObserverManager.getInstance().addObserver(msgKey, this);
+    }
+
+    protected void onReceiveMessage(int msgKey, Object msgObject) {
+
+    }
+
+    protected void sendMessage(int msgKey, Object msgObject) {
+        ObserverManager.getInstance().sendObserver(msgKey, msgObject);
+    }
+
+    protected void removeMessage(int msgKey) {
+        ObserverManager.getInstance().remove(msgKey);
+    }
+
+    @Override
+    public void observerUpData(int msgKey, Object object) {
+        onReceiveMessage(msgKey, object);
     }
 }

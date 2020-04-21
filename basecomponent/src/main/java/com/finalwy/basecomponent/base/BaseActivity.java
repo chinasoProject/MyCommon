@@ -6,12 +6,18 @@ import android.content.res.Resources;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.finalwy.basecomponent.observer.ObserverListener;
+import com.finalwy.basecomponent.observer.ObserverManager;
 import com.finalwy.basecomponent.utils.ContinuationClickUtils;
 import com.finalwy.basecomponent.utils.ToastUtil;
 import com.trello.rxlifecycle3.LifecycleTransformer;
 import com.trello.rxlifecycle3.components.support.RxAppCompatActivity;
 
 import androidx.annotation.Nullable;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import io.reactivex.disposables.CompositeDisposable;
@@ -21,13 +27,14 @@ import io.reactivex.disposables.Disposable;
  * @author wy
  * @Date 2020-02-18
  */
-public abstract class BaseActivity<T extends BasePresenter> extends RxAppCompatActivity implements BaseView {
+public abstract class BaseActivity<T extends BasePresenter> extends RxAppCompatActivity implements BaseView, ObserverListener {
     protected String TAG = getClass().getSimpleName();
     protected Context mContext;
     protected T mPresenter;
     private ToastUtil mToastUtil;
     private Unbinder unbinder;
     private CompositeDisposable mDisposables;
+    protected List<String> msgKeyList = new ArrayList<>();
 
     protected abstract int getViewLayout();
 
@@ -123,6 +130,13 @@ public abstract class BaseActivity<T extends BasePresenter> extends RxAppCompatA
             mDisposables = null;
 
         }
+        //销毁页面时销毁已经存在的msgKey
+        if (msgKeyList != null && msgKeyList.size() != 0) {
+            for (int i = 0; i < msgKeyList.size(); i++) {
+                removeMessage(Integer.parseInt(msgKeyList.get(i)));
+            }
+        }
+
     }
 
     /**
@@ -132,5 +146,27 @@ public abstract class BaseActivity<T extends BasePresenter> extends RxAppCompatA
      */
     public boolean isFastClick() {
         return ContinuationClickUtils.isFastClick();
+    }
+
+    protected void observeMessage(int msgKey) {
+        msgKeyList.add(msgKey + "");
+        ObserverManager.getInstance().addObserver(msgKey, this);
+    }
+
+    protected void onReceiveMessage(int msgKey, Object msgObject) {
+
+    }
+
+    protected void sendMessage(int msgKey, Object msgObject) {
+        ObserverManager.getInstance().sendObserver(msgKey, msgObject);
+    }
+
+    protected void removeMessage(int msgKey) {
+        ObserverManager.getInstance().remove(msgKey);
+    }
+
+    @Override
+    public void observerUpData(int msgKey, Object object) {
+        onReceiveMessage(msgKey, object);
     }
 }
